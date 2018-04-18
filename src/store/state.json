@@ -1,0 +1,20 @@
+{
+  "resources": {
+    "disk": {
+      "id": "disk",
+      "path": "disk:/",
+      "name": "Диск",
+      "type": "dir",
+      "size": 0,
+      "parentResourceId": null
+    },
+    "trash": {
+      "id": "trash",
+      "path": "trash:/",
+      "name": "Корзина",
+      "type": "dir",
+      "size": 0,
+      "parentResourceId": null
+    }
+  }
+}
