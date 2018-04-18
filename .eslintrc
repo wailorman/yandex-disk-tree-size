@@ -1,0 +1,26 @@
+{
+  "root": true,
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true,
+      "experimentalObjectRestSpread": true
+    }
+  },
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true
+  },
+  "plugins": [
+    "react",
+    "jsx-a11y"
+  ],
+  "extends": ["actid-react-app", "plugin:jsx-a11y/recommended", "plugin:react/recommended"],
+  "rules": {
+    "camelcase": [2, { "properties": "never" }],
+    "quotes": [2, "single"],
+    "jsx-a11y/href-no-hash": ["off"]
+  }
+}
