@@ -5,32 +5,38 @@ bluebird.promisifyAll(redis);
 
 const redisClient = redis.createClient('redis://192.168.99.100:6379');
 
-redisClient.on('ready', () => console.log('ready'));
+redisClient.on('ready', () => {
+  // eslint-disable-next-line no-console
+  console.log('ready');
+});
 
 module.exports = {
-  async get(key, maxAge, { rolling }) {
+  async get(key) {
     try {
-      return JSON.parse(await redisClient.getAsync(key)) || {}; 
+      return JSON.parse(await redisClient.getAsync(key)) || {};
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Getting session JSON error:', error);
       return {};
     }
   },
-  async set(key, data, maxAge, { rolling, changed }) {
+  async set(key, data, maxAge) {
     try {
       const strData = JSON.stringify(data);
-      return await redisClient.setAsync(key, strData, 'PX', maxAge); 
+      return await redisClient.setAsync(key, strData, 'PX', maxAge);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Setting session JSON error:', error);
       return {};
     }
   },
   async destroy(key) {
     try {
-      return redisClient.delAsync(key); 
+      return redisClient.delAsync(key);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Destroying session data error:', error);
       return {};
     }
-  }
+  },
 };

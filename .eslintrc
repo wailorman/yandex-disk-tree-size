@@ -1,26 +1,18 @@
 {
-  "root": true,
-  "parserOptions": {
-    "ecmaVersion": 2017,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true,
-      "experimentalObjectRestSpread": true
-    }
-  },
-  "env": {
-    "es6": true,
-    "browser": true,
-    "node": true
-  },
-  "plugins": [
-    "react",
-    "jsx-a11y"
-  ],
-  "extends": ["actid-react-app", "plugin:jsx-a11y/recommended", "plugin:react/recommended"],
+  "extends": "airbnb",
   "rules": {
-    "camelcase": [2, { "properties": "never" }],
-    "quotes": [2, "single"],
-    "jsx-a11y/href-no-hash": ["off"]
+    "react/jsx-filename-extension": "off",
+    "import/no-extraneous-dependencies": "off",
+    "no-unused-vars": "warn",
+    "implicit-arrow-linebreak": "off",
+    "react/jsx-one-expression-per-line": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/no-static-element-interactions": "off",
+    "jsx-a11y/anchor-is-valid": "off"
+  },
+  "globals": {
+    "document": true,
+    "window": true,
+    "localStorage": true
   }
 }

@@ -2,26 +2,20 @@ const querystring = require('querystring');
 const uuid = require('uuid');
 const axios = require('axios');
 
-const {
-  YANDEX_API_ID,
-  YANDEX_API_SECRET
-} = require('../../constants/index.js');
+const { YANDEX_API_ID, YANDEX_API_SECRET } = process.env;
 
-exports.generateAuthUrl = args => {
+exports.generateAuthUrl = (args) => {
   const { redirectUrl } = args;
-  return (
-    'https://oauth.yandex.ru/authorize?' +
-    querystring.stringify({
-      response_type: 'code',
-      client_id: YANDEX_API_ID,
-      device_id: uuid(),
-      device_name: 'browser',
-      redirect_uri: redirectUrl
-    })
-  );
+  return `https://oauth.yandex.ru/authorize?${querystring.stringify({
+    response_type: 'code',
+    client_id: YANDEX_API_ID,
+    device_id: uuid(),
+    device_name: 'browser',
+    redirect_uri: redirectUrl,
+  })}`;
 };
 
-exports.getToken = async args => {
+exports.getToken = async (args) => {
   const { code, refreshToken } = args;
 
   if (code) {
@@ -32,17 +26,17 @@ exports.getToken = async args => {
         method: 'POST',
         data: querystring.stringify({
           grant_type: 'authorization_code',
-          code: code,
+          code,
           client_id: YANDEX_API_ID,
-          client_secret: YANDEX_API_SECRET
+          client_secret: YANDEX_API_SECRET,
         }),
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
         auth: {
           username: YANDEX_API_ID,
-          password: YANDEX_API_SECRET
-        }
+          password: YANDEX_API_SECRET,
+        },
       });
 
       return tokenResponse.data;
@@ -59,15 +53,15 @@ exports.getToken = async args => {
           grant_type: 'refresh_token',
           refresh_token: refreshToken,
           client_id: YANDEX_API_ID,
-          client_secret: YANDEX_API_SECRET
+          client_secret: YANDEX_API_SECRET,
         }),
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
         auth: {
           username: YANDEX_API_ID,
-          password: YANDEX_API_SECRET
-        }
+          password: YANDEX_API_SECRET,
+        },
       });
 
       return tokenResponse.data;
@@ -89,11 +83,11 @@ exports.getResourceInfo = async (args = {}, ctx = {}) => {
     params: {
       path,
       fields: 'name,resource_id,path,type,_embedded',
-      limit: 100000
+      limit: 100000,
     },
     headers: {
-      'Authorization': `OAuth ${accessToken}`
-    }
+      Authorization: `OAuth ${accessToken}`,
+    },
   });
 
   return data;
