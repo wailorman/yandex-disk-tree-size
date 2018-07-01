@@ -44,4 +44,10 @@ router.get('/ping', async ctx => {
   ctx.body = 'OK';
 });
 
+router.get('/is-authenticated', async (ctx) => {
+  ctx.body = {
+    response: !!ctx.session.accessToken
+  }
+})
+
 module.exports = router;
