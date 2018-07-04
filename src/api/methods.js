@@ -4,7 +4,7 @@ import axios from 'axios';
 export const isAuthenticated = async () => {
   const {
     data: { response },
-  } = await axios.get(`${process.env.REACT_APP_API_URL}/is-authenticated`, {
+  } = await axios.get(`${process.env.REACT_APP_API_URL}/api/is-authenticated`, {
     withCredentials: true,
   });
   return response;

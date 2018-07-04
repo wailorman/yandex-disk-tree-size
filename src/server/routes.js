@@ -37,12 +37,12 @@ router.get('/api/yandex/resource', async (ctx) => {
   };
 });
 
-router.get('/ping', async (ctx) => {
+router.get('/api/ping', async (ctx) => {
   ctx.status = 200;
   ctx.body = 'OK';
 });
 
-router.get('/is-authenticated', async (ctx) => {
+router.get('/api/is-authenticated', async (ctx) => {
   ctx.body = {
     response: !!ctx.session.accessToken,
   };
