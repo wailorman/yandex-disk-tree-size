@@ -43,28 +43,29 @@ export const startFetchingResources = () => async (dispatch) => {
   yandexDiskPuller.start();
 };
 
-export const fetchResource = resourceId => async (dispatch) => {
-  dispatch({ type: AT.RESOURCE_FETCH, payload: { id: resourceId } });
-
-  const resource = await db.resources.get(resourceId);
-
-  dispatch({ type: AT.RESOURCE_FETCH_SUCCESS, payload: { id: resourceId, resource } });
-};
-
-export const fetchResourceChilds = resourceId => async (dispatch) => {
-  dispatch({ type: AT.RESOURCE_CHILDS_FETCH, payload: { id: resourceId } });
-
-  const resources = await db.resources.where({ parentResourceId: resourceId }).toArray();
-
-  dispatch({ type: AT.RESOURCE_CHILDS_FETCH_SUCCESS, payload: { id: resourceId, resources } });
-};
-
-export const changeCollapsedState = resourceId => (dispatch, getState) => {
+export const changeCollapsedState = resourceId => async (dispatch, getState) => {
   const state = getState();
 
   const currentState = ResourcesSelectors.isResourceOpenedSelector(resourceId)(state);
-  dispatch({
-    type: AT.CHANGE_RESOURCE_COLLAPSED_STATE,
-    payload: { id: resourceId, state: !currentState },
-  });
+
+  const isOpening = !currentState;
+
+  if (isOpening) {
+    dispatch({ type: AT.RESOURCE_FETCH, payload: { id: resourceId } });
+
+    dispatch({
+      type: AT.CHANGE_RESOURCE_COLLAPSED_STATE,
+      payload: { id: resourceId, state: !currentState },
+    });
+
+    const resources = await db.resources.where({ parentResourceId: resourceId }).toArray();
+
+    dispatch({ type: AT.RESOURCE_FETCH_SUCCESS, payload: { id: resourceId, resources } });
+  } else {
+    // closing
+    dispatch({
+      type: AT.CHANGE_RESOURCE_COLLAPSED_STATE,
+      payload: { id: resourceId, state: !currentState },
+    });
+  }
 };

@@ -6,7 +6,7 @@ export const resourcesStateSelector = state => state.resources;
 
 export const objectsSelector = createSelector(
   resourcesStateSelector,
-  resourcesState => resourcesState.objects,
+  resourcesState => resourcesState.objects || {},
 );
 
 export const hasManyRelationsSelector = createSelector(
@@ -37,7 +37,7 @@ export const childResourcesIdsSelector = (requestedResourceId = 'root') =>
 //       .filter(resource => resource.parentResourceId === requestedResourceId));
 
 export const resourceSelector = (requestedResourceId = 'root') =>
-  createSelector(objectsSelector, objectsState => objectsState[requestedResourceId]);
+  createSelector(objectsSelector, objectsState => objectsState[requestedResourceId] || {});
 
 export const isResourceOpenedSelector = requestedResourceId =>
   createSelector(openedSelector, openedState => !!openedState[requestedResourceId]);

@@ -8,6 +8,7 @@ import { Button, Welcome } from '@storybook/react/demo';
 
 require('./Auth.story');
 require('./Resource.story');
+require('./Bucket.story');
 
 storiesOf('Welcome', module).add('to Storybook', () => <Welcome showApp={linkTo('Button')} />);
 

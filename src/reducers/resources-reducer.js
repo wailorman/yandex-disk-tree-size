@@ -4,7 +4,7 @@ import * as AT from '../constants/action-types';
 
 export const objectsReducer = (state = {}, action = {}) => {
   switch (action.type) {
-    case AT.RESOURCE_CHILDS_FETCH_SUCCESS:
+    case AT.RESOURCE_FETCH_SUCCESS:
       return action.payload.resources.reduce(
         (prev, curResource) => ({
           ...prev,
@@ -40,7 +40,7 @@ export const loadingReducer = (state = {}, action = {}) => {
 
 export const belongsToRelationsReducer = (state = {}, action = {}) => {
   switch (action.type) {
-    case AT.RESOURCE_CHILDS_FETCH_SUCCESS:
+    case AT.RESOURCE_FETCH_SUCCESS:
       return action.payload.resources.reduce(
         (prev, curResource) => ({
           ...prev,
@@ -55,7 +55,7 @@ export const belongsToRelationsReducer = (state = {}, action = {}) => {
 };
 export const hasManyRelationsReducer = (state = {}, action = {}) => {
   switch (action.type) {
-    case AT.RESOURCE_CHILDS_FETCH_SUCCESS:
+    case AT.RESOURCE_FETCH_SUCCESS:
       return action.payload.resources.reduce(
         (prev, curResource) => ({
           ...prev,

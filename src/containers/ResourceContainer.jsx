@@ -49,7 +49,6 @@ export const mapStateToProps = (state, ownProps) => ({
 export const mapDispatchToProps = (dispatch, ownProps) => ({
   changeCollapsedState: () => {
     dispatch(ResourcesActions.changeCollapsedState(ownProps.id));
-    dispatch(ResourcesActions.fetchResourceChilds(ownProps.id));
   },
 });
 
