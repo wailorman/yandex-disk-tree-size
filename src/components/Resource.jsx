@@ -7,17 +7,13 @@ import filesize from 'filesize';
 import { Icon } from './Icon';
 
 const Wrapper = styled.div`
+  background-color: ${({ selected }) => (selected ? 'rgba(0,0,0,.02)' : 'none')};
+`;
+
+const HeaderWrapper = styled.div`
   font-family: sans-serif;
   font-size: 0.85em;
   display: block;
-
-  &:after {
-    content: '';
-    display: block;
-    margin: 0 47px 0 10px;
-    height: 1px;
-    background: rgba(0, 0, 0, 0.1);
-  }
 `;
 
 const Container = styled.div`
@@ -66,8 +62,8 @@ const ChildrenWrapper = styled.div`
 export const Resource = ({
   name, size, loading, type, selected, children, onClick,
 }) => (
-  <div>
-    <Wrapper>
+  <Wrapper selected={selected}>
+    <HeaderWrapper>
       <Container selected={selected} onClick={onClick}>
         <IconWrapper>
           <Icon type={type} />
@@ -79,9 +75,9 @@ export const Resource = ({
           {loading && <StyledSpinner name="double-bounce" fadeIn={0} />}
         </LoadingWrapper>
       </Container>
-    </Wrapper>
+    </HeaderWrapper>
     <ChildrenWrapper>{children}</ChildrenWrapper>
-  </div>
+  </Wrapper>
 );
 
 Resource.propTypes = {
