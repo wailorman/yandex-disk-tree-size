@@ -109,5 +109,16 @@ describe('Storage / Resource processors', () => {
       expect(spy.calls.count()).toEqual(1);
       expect(spy.calls.argsFor(0).toString()).toMatch(/can't find/i);
     });
+
+    it('should works if resource is orphan', async () => {
+      const resources = [
+        {
+          id: 'screenshots01',
+          name: 'Screenshots',
+        },
+      ];
+      const ctx = { db };
+      await setChildResourcesIds(ctx)(resources);
+    });
   });
 });

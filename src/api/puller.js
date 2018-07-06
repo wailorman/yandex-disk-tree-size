@@ -3,10 +3,17 @@ import Promise from 'bluebird';
 
 import { pullResourceInfo } from './methods';
 import { db } from './db';
+import * as ResourcesProcessors from './resources-processors';
 
-export const saveResources = async (resources = [], ctx = {}) => {
-  await ctx.db.resources.bulkAdd(resources);
-};
+const pcompose = (...functions) => initialValue =>
+  functions.reduceRight((sum, fn) => Promise.resolve(sum).then(fn), initialValue);
+
+export const processResources = (resources, ctx) =>
+  pcompose(
+    ResourcesProcessors.setChildResourcesIds(ctx),
+    ResourcesProcessors.saveResources(ctx),
+    //
+  )(resources);
 
 // eslint-disable-next-line no-unused-vars
 export const worker = async (args = {}, ctx = {}) => {
@@ -36,7 +43,7 @@ export const worker = async (args = {}, ctx = {}) => {
           parentResourceId: id,
         }));
 
-        await saveResources(resources, ctx);
+        await processResources(resources, ctx);
 
         resources.filter(({ type }) => type === 'dir').forEach((resource) => {
           ctx.queue.push({ id: resource.id, path: resource.path });
@@ -44,7 +51,11 @@ export const worker = async (args = {}, ctx = {}) => {
       })
       .delay(100)
       .then(() => proceedTask())
-      .catch(() => proceedTask());
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error(err);
+        proceedTask();
+      });
 
   Promise.all(times(threads, true).map(proceedTask));
 };
@@ -55,6 +66,7 @@ export const start = async (args = {}, ctx = {}) => {
 
   ctx.started = true;
   await ctx.db.resources.clear();
+  await processResources(ctx.rootResources, ctx);
   worker({}, ctx);
 };
 
@@ -63,7 +75,7 @@ export const stop = async (args = {}, ctx = {}) => {
   ctx.started = false;
 };
 
-export const configure = (conf = {}) => {
+export const configure = async (conf = {}) => {
   const { onSuccess, throttle = 10000 } = conf;
   const ctx = {};
 

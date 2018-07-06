@@ -5,40 +5,42 @@ import * as ResourcesSelectors from '../selectors/resources-selectors';
 import * as ResourcesPuller from '../api/puller';
 import { db } from '../api/db';
 
-const yandexDiskPuller = ResourcesPuller.configure({
-  rootResources: [
-    {
-      id: 'root',
-      name: 'root',
-      path: '/',
-    },
-    {
-      id: 'disk',
-      name: 'Disk',
-      path: 'disk:/',
-      parentResourceId: 'root',
-    },
-    {
-      id: 'trash',
-      name: 'Trash',
-      path: 'trash:/',
-      parentResourceId: 'root',
-    },
-  ],
-  tasks: [
-    {
-      id: 'disk',
-      path: 'disk:/',
-    },
-    {
-      id: 'trash',
-      path: 'trash:/',
-    },
-  ],
-});
+let yandexDiskPuller;
 
 export const startFetchingResources = () => async (dispatch) => {
   dispatch({ type: AT.START_FETCHING_RESOURCES });
+
+  yandexDiskPuller = await ResourcesPuller.configure({
+    rootResources: [
+      {
+        id: 'root',
+        name: 'root',
+        path: '/',
+      },
+      {
+        id: 'disk',
+        name: 'Disk',
+        path: 'disk:/',
+        parentResourceId: 'root',
+      },
+      {
+        id: 'trash',
+        name: 'Trash',
+        path: 'trash:/',
+        parentResourceId: 'root',
+      },
+    ],
+    tasks: [
+      {
+        id: 'disk',
+        path: 'disk:/',
+      },
+      // {
+      //   id: 'trash',
+      //   path: 'trash:/',
+      // },
+    ],
+  });
 
   yandexDiskPuller.start();
 };
