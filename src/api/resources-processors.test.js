@@ -68,7 +68,8 @@ describe('Storage / Resource processors', () => {
         },
       ];
 
-      const res = await setChildResourcesIds(db)(resources);
+      const ctx = { db };
+      const res = await setChildResourcesIds(ctx)(resources);
       expect(res).toEqual(resources);
     });
 
@@ -86,7 +87,8 @@ describe('Storage / Resource processors', () => {
         },
       ];
 
-      await setChildResourcesIds(db)(resources);
+      const ctx = { db };
+      await setChildResourcesIds(ctx)(resources);
       const parentResource = await db.resources.get('disk');
       expect(parentResource.childResourcesIds).toEqual(['screenshots01', 'screenshots02']);
     });
@@ -101,7 +103,8 @@ describe('Storage / Resource processors', () => {
       ];
 
       const spy = jasmine.createSpy('catch');
-      await setChildResourcesIds(db)(resources).catch(spy);
+      const ctx = { db };
+      await setChildResourcesIds(ctx)(resources).catch(spy);
 
       expect(spy.calls.count()).toEqual(1);
       expect(spy.calls.argsFor(0).toString()).toMatch(/can't find/i);
