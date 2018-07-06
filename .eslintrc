@@ -13,6 +13,16 @@
   "globals": {
     "document": true,
     "window": true,
-    "localStorage": true
+    "localStorage": true,
+    "expect": true,
+    "it": true,
+    "describe": true,
+    "before": true,
+    "after": true,
+    "beforeEach": true,
+    "afterEach": true,
+    "beforeAll": true,
+    "afterAll": true,
+    "jasmine": true
   }
 }

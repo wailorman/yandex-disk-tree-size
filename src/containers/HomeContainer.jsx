@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import compose from 'compose-function';
 import styled from 'styled-components';
 
-import * as ResourceActions from '../actions/resource-actions';
+import * as ResourceActions from '../actions/resources-actions';
 
 import { ResourceContainer } from './ResourceContainer';
 
@@ -19,20 +19,20 @@ export const HomeContainer = compose(
   connect(
     null,
     dispatch => ({
-      fetchResources: () => dispatch(ResourceActions.fetchResources()),
+      startFetchingResources: () => dispatch(ResourceActions.startFetchingResources()),
     }),
   ),
   // lifecycle({
-  //   componentDidMount({ fetchResources }) {
-  //     fetchResources();
+  //   componentDidMount({ startFetchingResources }) {
+  //     startFetchingResources();
   //   },
   // }),
-)(({ fetchResources }) => (
+)(({ startFetchingResources }) => (
   <PageWrapper>
-    <button type="button" onClick={fetchResources}>
+    <button type="button" onClick={startFetchingResources}>
       Fetch
     </button>
-    <ResourceContainer />
+    <ResourceContainer id="disk" />
   </PageWrapper>
 ));
 

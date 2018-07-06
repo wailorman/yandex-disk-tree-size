@@ -1,21 +1,43 @@
 import { createSelector } from 'reselect';
 
-export const resourcesSelector = state => state.resources;
+export const resourcesStateSelector = state => state.resources;
+
+// ----------------------
 
 export const objectsSelector = createSelector(
-  resourcesSelector,
+  resourcesStateSelector,
   resourcesState => resourcesState.objects,
 );
 
-export const childResourcesSelector = (requestedResourceId = 'root') =>
-  createSelector(objectsSelector, objectsState =>
-    Object.keys(objectsState)
-      .map(resourceId => objectsState[resourceId])
-      .filter(resource => resource.parentResourceId === requestedResourceId));
+export const hasManyRelationsSelector = createSelector(
+  resourcesStateSelector,
+  resourcesState => resourcesState.hasManyRelations,
+);
+
+export const belongsToRelationsSelector = createSelector(
+  resourcesStateSelector,
+  resourcesState => resourcesState.belongsToRelations,
+);
+
+export const openedSelector = createSelector(
+  resourcesStateSelector,
+  resourcesState => resourcesState.opened,
+);
+
+// ----------------------
 
 export const childResourcesIdsSelector = (requestedResourceId = 'root') =>
-  createSelector(childResourcesSelector(requestedResourceId), childResourcesArray =>
-    childResourcesArray.map(({ id }) => id));
+  createSelector(hasManyRelationsSelector, hasManyRelationsState =>
+    Object.keys(hasManyRelationsState[requestedResourceId] || {}));
+
+// export const childResourcesSelector = (requestedResourceId = 'root') =>
+//   createSelector(objectsSelector, objectsState =>
+//     Object.keys(objectsState)
+//       .map(resourceId => objectsState[resourceId])
+//       .filter(resource => resource.parentResourceId === requestedResourceId));
 
 export const resourceSelector = (requestedResourceId = 'root') =>
   createSelector(objectsSelector, objectsState => objectsState[requestedResourceId]);
+
+export const isResourceOpenedSelector = requestedResourceId =>
+  createSelector(openedSelector, openedState => !!openedState[requestedResourceId]);
