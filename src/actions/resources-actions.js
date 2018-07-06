@@ -1,17 +1,16 @@
 /* eslint-disable import/prefer-default-export */
 // import { pullResourceInfo } from '../api/methods';
 import * as AT from '../constants/action-types';
-import * as ResourceSelectors from '../selectors/resources-selectors';
-import { ResourcesPuller } from '../api/puller';
+import * as ResourcesSelectors from '../selectors/resources-selectors';
+import * as ResourcesPuller from '../api/puller';
 import { db } from '../api/db';
+
+const yandexDiskPuller = ResourcesPuller.configure();
 
 export const startFetchingResources = () => async (dispatch) => {
   dispatch({ type: AT.START_FETCHING_RESOURCES });
 
-  const puller = new ResourcesPuller({
-  });
-
-  puller.start();
+  yandexDiskPuller.start();
 };
 
 export const fetchResource = resourceId => async (dispatch) => {
@@ -33,7 +32,7 @@ export const fetchResourceChilds = resourceId => async (dispatch) => {
 export const changeCollapsedState = resourceId => (dispatch, getState) => {
   const state = getState();
 
-  const currentState = ResourceSelectors.isResourceOpenedSelector(resourceId)(state);
+  const currentState = ResourcesSelectors.isResourceOpenedSelector(resourceId)(state);
   dispatch({
     type: AT.CHANGE_RESOURCE_COLLAPSED_STATE,
     payload: { id: resourceId, state: !currentState },

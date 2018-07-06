@@ -4,109 +4,93 @@ import Promise from 'bluebird';
 import { pullResourceInfo } from './methods';
 import { db } from './db';
 
-export class ResourcesPuller {
-  constructor(conf) {
-    const { onSuccess, throttle = 10000 } = conf;
-    const self = this;
+export const saveResources = async (resources = [], ctx = {}) => {
+  await ctx.db.resources.bulkAdd(resources);
+};
 
-    self.onSuccess = onSuccess;
-    self.throttle = throttle;
+// eslint-disable-next-line no-unused-vars
+export const worker = async (args = {}, ctx = {}) => {
+  if (!ctx.started) return;
 
-    self.queue = [];
-    self.started = false;
-    self.resources = [];
+  const threads = 6;
 
-    setInterval(async () => {
-      const dbCount = await db.resources.count();
-      const queueSize = self.queue.length;
+  const proceedTask = () =>
+    Promise.resolve()
+      .then(async () => {
+        const task = ctx.queue.shift();
 
-      // eslint-disable-next-line no-console
-      console.log('dbCount', dbCount, 'queueSize', queueSize);
-    }, 1000);
+        if (!task) return;
+        if (!ctx.started) return;
 
-    // setInterval(() => {
-    //   // if (self.resources.length === 0) return;
-    //   // self.onSuccess([...self.resources]);
-    //   // self.resources = [];
-    //   // const lengthBefore = self.resources.length;
-    //   const toSend = self.resources.splice(0, 100);
-    //   self.onSuccess(toSend);
-    //   const lengthAfter = self.resources.length;
-    //   console.log('Shiped:', toSend.length, 'Remaining:', lengthAfter);
-    // }, self.throttle);
-  }
+        const { id, path } = task;
 
-  static async saveResources(resources) {
-    await db.resources.bulkAdd(resources);
-  }
+        const res = await pullResourceInfo({ path });
 
-  async start() {
-    const self = this;
-    self.queue = [
-      {
-        id: 'disk',
-        path: '/',
-      },
-    ];
+        // eslint-disable-next-line no-underscore-dangle
+        const resources = res._embedded.items.map(resource => ({
+          id: resource.resource_id,
+          name: resource.name,
+          type: resource.type,
+          path: resource.path,
+          size: resource.size || 0,
+          parentResourceId: id,
+        }));
 
-    self.started = true;
-    await db.resources.clear();
-    self.worker();
-  }
+        await saveResources(resources, ctx);
 
-  stop() {
-    const self = this;
-    self.started = false;
-  }
+        resources.filter(({ type }) => type === 'dir').forEach((resource) => {
+          ctx.queue.push({ id: resource.id, path: resource.path });
+        });
+      })
+      .delay(100)
+      .then(() => proceedTask())
+      .catch(() => proceedTask());
 
-  worker() {
-    const self = this;
-    // debugger;
-    // setTimeout(() => {
-    if (!self.started) return;
+  Promise.all(times(threads, true).map(proceedTask));
+};
 
-    const threads = times(6, true);
+// eslint-disable-next-line no-unused-vars
+export const start = async (args = {}, ctx = {}) => {
+  ctx.queue = [
+    {
+      id: 'disk',
+      path: '/',
+    },
+  ];
 
-    const proceedTask = () =>
-      Promise.resolve()
-        .then(async () => {
-          const task = self.queue.shift();
+  ctx.started = true;
+  await ctx.db.resources.clear();
+  worker({}, ctx);
+};
 
-          if (!task) return;
+// eslint-disable-next-line no-unused-vars
+export const stop = async (args = {}, ctx = {}) => {
+  ctx.started = false;
+};
 
-          const { id, path } = task;
+export const configure = (conf = {}) => {
+  const { onSuccess, throttle = 10000 } = conf;
+  const ctx = {};
 
-          const res = await pullResourceInfo({ path });
+  ctx.onSuccess = onSuccess;
+  ctx.throttle = throttle;
 
-          // eslint-disable-next-line no-underscore-dangle
-          const resources = res._embedded.items.map(resource => ({
-            id: resource.resource_id,
-            name: resource.name,
-            type: resource.type,
-            path: resource.path,
-            size: resource.size || 0,
-            parentResourceId: id,
-          }));
+  ctx.queue = [];
+  ctx.started = false;
+  ctx.resources = [];
 
-          await ResourcesPuller.saveResources(resources);
+  ctx.db = db;
 
-          // debugger;
+  setInterval(async () => {
+    const dbCount = await db.resources.count();
+    const queueSize = ctx.queue.length;
 
-          resources.filter(({ type }) => type === 'dir').forEach((resource) => {
-            self.queue.push({ id: resource.id, path: resource.path });
-          });
-        })
-        .delay(100)
-        .then(() => proceedTask())
-        .catch(() => proceedTask());
+    // eslint-disable-next-line no-console
+    console.log('dbCount', dbCount, 'queueSize', queueSize);
+  }, 1000);
 
-    Promise.all(threads.map(proceedTask));
-    // }, 0);
-  }
-
-  // async processResources(resources) {
-
-  // }
-}
-
-export default ResourcesPuller;
+  return {
+    start: () => start({}, ctx),
+    stop: () => stop({}, ctx),
+  };
+};
