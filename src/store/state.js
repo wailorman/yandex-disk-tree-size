@@ -9,6 +9,14 @@ module.exports = {
         size: 0,
         parentResourceId: null,
       },
+      trash: {
+        id: 'trash',
+        name: 'Диск',
+        path: 'trash:/',
+        type: 'dir',
+        size: 0,
+        parentResourceId: null,
+      },
     },
     opened: {},
     belongsToRelations: {

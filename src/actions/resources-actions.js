@@ -5,7 +5,20 @@ import * as ResourcesSelectors from '../selectors/resources-selectors';
 import * as ResourcesPuller from '../api/puller';
 import { db } from '../api/db';
 
-const yandexDiskPuller = ResourcesPuller.configure();
+const yandexDiskPuller = ResourcesPuller.configure({
+  rootResources: [
+    {
+      id: 'disk',
+      name: 'Disk',
+      path: 'disk:/',
+    },
+    {
+      id: 'trash',
+      name: 'Trash',
+      path: 'trash:/',
+    },
+  ],
+});
 
 export const startFetchingResources = () => async (dispatch) => {
   dispatch({ type: AT.START_FETCHING_RESOURCES });

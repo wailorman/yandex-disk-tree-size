@@ -51,12 +51,7 @@ export const worker = async (args = {}, ctx = {}) => {
 
 // eslint-disable-next-line no-unused-vars
 export const start = async (args = {}, ctx = {}) => {
-  ctx.queue = [
-    {
-      id: 'disk',
-      path: '/',
-    },
-  ];
+  ctx.queue = [...ctx.rootResources];
 
   ctx.started = true;
   await ctx.db.resources.clear();
@@ -76,6 +71,7 @@ export const configure = (conf = {}) => {
   ctx.throttle = throttle;
 
   ctx.queue = [];
+  ctx.rootResources = conf.rootResources || [{ id: 'root', path: '/' }];
   ctx.started = false;
   ctx.resources = [];
 

@@ -32,7 +32,7 @@ export const HomeContainer = compose(
     <button type="button" onClick={startFetchingResources}>
       Fetch
     </button>
-    <ResourceContainer id="disk" />
+    <ResourceContainer id="trash" />
   </PageWrapper>
 ));
 
