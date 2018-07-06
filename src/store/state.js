@@ -1,21 +1,26 @@
 module.exports = {
   resources: {
     objects: {
+      root: {
+        id: 'Яндекс.Диск',
+        name: 'root',
+        path: '/',
+        type: 'dir',
+        parentResourceId: null,
+      },
       disk: {
         id: 'disk',
         name: 'Диск',
         path: 'disk:/',
         type: 'dir',
-        size: 0,
-        parentResourceId: null,
+        parentResourceId: 'root',
       },
       trash: {
         id: 'trash',
-        name: 'Диск',
+        name: 'Корзина',
         path: 'trash:/',
         type: 'dir',
-        size: 0,
-        parentResourceId: null,
+        parentResourceId: 'root',
       },
     },
     opened: {},

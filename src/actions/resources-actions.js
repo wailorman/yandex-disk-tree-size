@@ -8,13 +8,30 @@ import { db } from '../api/db';
 const yandexDiskPuller = ResourcesPuller.configure({
   rootResources: [
     {
+      id: 'root',
+      name: 'root',
+      path: '/',
+    },
+    {
       id: 'disk',
       name: 'Disk',
       path: 'disk:/',
+      parentResourceId: 'root',
     },
     {
       id: 'trash',
       name: 'Trash',
+      path: 'trash:/',
+      parentResourceId: 'root',
+    },
+  ],
+  tasks: [
+    {
+      id: 'disk',
+      path: 'disk:/',
+    },
+    {
+      id: 'trash',
       path: 'trash:/',
     },
   ],
