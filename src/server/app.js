@@ -3,6 +3,7 @@ require('dotenv').config();
 const Koa = require('koa');
 const session = require('koa-session');
 const cors = require('@koa/cors');
+const noCache = require('koa-no-cache');
 
 const routes = require('./routes');
 const redisStore = require('./redis-store');
@@ -42,6 +43,11 @@ app.use(session(CONFIG, app));
 app.use(
   cors({
     credentials: true,
+  }),
+);
+app.use(
+  noCache({
+    paths: ['/api/yandex/(.*)'],
   }),
 );
 
