@@ -8,18 +8,19 @@ import * as ResourcesProcessors from './resources-processors';
 const pcompose = (...functions) => initialValue =>
   functions.reduceRight((sum, fn) => Promise.resolve(sum).then(fn), initialValue);
 
-export const processResources = (resources, ctx) =>
+export const processResources = (resourcePayload, ctx) =>
   pcompose(
-    ResourcesProcessors.setChildResourcesIds(ctx),
+    ResourcesProcessors.setAllParentResourcesIds(ctx),
+    // ResourcesProcessors.setChildResourcesIds(ctx),
     ResourcesProcessors.saveResources(ctx),
     //
-  )(resources);
+  )(resourcePayload);
 
 // eslint-disable-next-line no-unused-vars
 export const worker = async (args = {}, ctx = {}) => {
   if (!ctx.started) return;
 
-  const threads = 6;
+  const threads = 1;
 
   const proceedTask = () =>
     Promise.resolve()
@@ -43,7 +44,12 @@ export const worker = async (args = {}, ctx = {}) => {
           parentResourceId: id,
         }));
 
-        await processResources(resources, ctx);
+        const resourcePayload = {
+          resources,
+          parentResourceId: id,
+        };
+
+        await processResources(resourcePayload, ctx);
 
         resources.filter(({ type }) => type === 'dir').forEach((resource) => {
           ctx.queue.push({ id: resource.id, path: resource.path });
