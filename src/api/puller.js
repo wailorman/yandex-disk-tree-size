@@ -10,6 +10,7 @@ const pcompose = (...functions) => initialValue =>
 
 export const processResources = (resourcePayload, ctx) =>
   pcompose(
+    ResourcesProcessors.setSizes(ctx),
     ResourcesProcessors.setAllParentResourcesIds(ctx),
     // ResourcesProcessors.setChildResourcesIds(ctx),
     ResourcesProcessors.saveResources(ctx),
@@ -20,7 +21,7 @@ export const processResources = (resourcePayload, ctx) =>
 export const worker = async (args = {}, ctx = {}) => {
   if (!ctx.started) return;
 
-  const threads = 1;
+  const threads = 10;
 
   const proceedTask = () =>
     Promise.resolve()
@@ -72,7 +73,11 @@ export const start = async (args = {}, ctx = {}) => {
 
   ctx.started = true;
   await ctx.db.resources.clear();
-  await processResources(ctx.rootResources, ctx);
+  const resourcePayload = {
+    resources: ctx.rootResources,
+    // parentResourceId: id,
+  };
+  await processResources(resourcePayload, ctx);
   worker({}, ctx);
 };
 
