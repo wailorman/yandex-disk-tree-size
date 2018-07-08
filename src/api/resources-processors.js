@@ -1,5 +1,6 @@
 import Promise from 'bluebird';
 import uniq from 'lodash/uniq';
+import Dexie from 'dexie';
 
 export const setChildResourcesIds = (ctx = {}) => async (resourcePayload = {}) => {
   const { resources = [] } = resourcePayload;
@@ -64,6 +65,31 @@ export const setAllParentResourcesIds = ctx => async (resourcePayload = {}) => {
       });
     });
   });
+
+  return resourcePayload;
+};
+
+export const setSizes = ctx => async (resourcePayload = {}) => {
+  const { resources = [], parentResourceId } = resourcePayload;
+
+  const totalSize = resources.reduce((prev, cur) => {
+    const curSize = +((cur && cur.size) || 0);
+    return prev + curSize;
+  }, 0);
+
+  const parentResource = await ctx.db.resources.get(parentResourceId);
+  const greatParentsIds = parentResource.allParentResourcesIds || [];
+  const greatParents = await Promise.all(
+    greatParentsIds.map(gParentId => ctx.db.resources.get(gParentId)),
+  );
+
+  Promise.all(
+    [parentResource, ...greatParents].map(async (resource) => {
+      await ctx.db.resources.update(resource.id, {
+        size: (resource.size || 0) + totalSize,
+      });
+    }),
+  );
 
   return resourcePayload;
 };

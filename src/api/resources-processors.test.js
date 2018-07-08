@@ -4,6 +4,7 @@ import {
   setChildResourcesIds,
   setAllParentResourcesIds,
   _splitToRelationsSteps,
+  setSizes,
 } from './resources-processors';
 
 describe('Storage / Resource processors', () => {
@@ -251,6 +252,57 @@ describe('Storage / Resource processors', () => {
       expect(res[1].slice().sort()).toEqual(['folder1'].sort());
       expect(res[2].slice().sort()).toEqual(['folder2'].sort());
       expect(res[3].slice().sort()).toEqual(['folder3.1', 'folder3.2'].sort());
+    });
+  });
+
+  describe(`#setSizes`, () => {
+    it(`should set sizes`, async () => {
+      const fixtures = [
+        {
+          id: 'disk',
+          size: 90,
+        },
+        {
+          id: 'folder1',
+          allParentResourcesIds: ['disk'],
+          size: 50,
+        },
+        {
+          id: 'folder2',
+          allParentResourcesIds: ['disk', 'folder1'],
+          size: 40,
+        },
+      ];
+
+      const resources = [
+        {
+          id: 'dir1',
+        },
+        {
+          id: 'file1',
+          size: 10,
+        },
+        {
+          id: 'file2',
+          size: 20,
+        },
+      ];
+
+      await db.resources.clear();
+      await db.resources.bulkPut(fixtures);
+      const ctx = { db };
+
+      await setSizes(ctx)({ parentResourceId: 'folder2', resources });
+
+      const [disk, folder1, folder2] = await Promise.all([
+        db.resources.get('disk'),
+        db.resources.get('folder1'),
+        db.resources.get('folder2'),
+      ]);
+
+      expect(disk.size).toEqual(90 + 30);
+      expect(folder1.size).toEqual(50 + 30);
+      expect(folder2.size).toEqual(40 + 30);
     });
   });
 });
