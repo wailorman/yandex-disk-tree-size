@@ -27,8 +27,12 @@ export const openedSelector = createSelector(
 // ----------------------
 
 export const childResourcesIdsSelector = (requestedResourceId = 'root') =>
-  createSelector(hasManyRelationsSelector, hasManyRelationsState =>
-    Object.keys(hasManyRelationsState[requestedResourceId] || {}));
+  createSelector(hasManyRelationsSelector, objectsSelector, (hasManyRelationsState, objects) =>
+    Object.keys(hasManyRelationsState[requestedResourceId] || {}).sort((resIdA, resIdB) => {
+      const { size: sizeA } = objects[resIdA];
+      const { size: sizeB } = objects[resIdB];
+      return (sizeB || 0) - (sizeA || 0);
+    }));
 
 // export const childResourcesSelector = (requestedResourceId = 'root') =>
 //   createSelector(objectsSelector, objectsState =>

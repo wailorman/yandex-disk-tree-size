@@ -11,13 +11,13 @@ import { Resource } from '../components/Resource';
 
 export const ResourceContainerComponent = (props) => {
   const {
-    resource: { name, type },
+    resource: { name, type, size },
     opened,
     childResourcesIds,
     changeCollapsedState,
   } = props;
   return (
-    <Resource name={name} type={type} selected={opened} onClick={changeCollapsedState}>
+    <Resource name={name} type={type} size={size} selected={opened} onClick={changeCollapsedState}>
       {opened
         && (childResourcesIds || []).map(resourceId => (
           <ResourceContainer key={resourceId} id={resourceId} />
@@ -32,6 +32,7 @@ ResourceContainerComponent.propTypes = {
   resource: PropTypes.shape({
     name: PropTypes.string,
     type: PropTypes.string,
+    size: PropTypes.number,
   }).isRequired,
   opened: PropTypes.bool.isRequired,
   childResourcesIds: PropTypes.arrayOf(PropTypes.string).isRequired,
