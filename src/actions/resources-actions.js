@@ -1,5 +1,4 @@
-/* eslint-disable import/prefer-default-export */
-// import { pullResourceInfo } from '../api/methods';
+import Promise from 'bluebird';
 import * as AT from '../constants/action-types';
 import * as ResourcesSelectors from '../selectors/resources-selectors';
 import * as ResourcesPuller from '../api/puller';
@@ -11,6 +10,11 @@ export const startFetchingResources = () => async (dispatch) => {
   dispatch({ type: AT.START_FETCHING_RESOURCES });
 
   yandexDiskPuller = await ResourcesPuller.configure({
+    onChange: async (resourcesIds) => {
+      const resources = await Promise.map(resourcesIds, resourceId => db.resources.get(resourceId));
+      dispatch({ type: AT.RESOURCE_FETCH_SUCCESS, payload: { resources } });
+    },
+    throttle: 2000,
     rootResources: [
       {
         id: 'root',
@@ -70,4 +74,7 @@ export const changeCollapsedState = resourceId => async (dispatch, getState) => 
       payload: { id: resourceId, state: !currentState },
     });
   }
+
+  const presentedResourcesIds = Object.keys(ResourcesSelectors.objectsSelector(getState()));
+  yandexDiskPuller.subscribeTo(presentedResourcesIds);
 };

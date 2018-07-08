@@ -1,4 +1,5 @@
 import times from 'lodash/times';
+import uniq from 'lodash/uniq';
 import Promise from 'bluebird';
 
 import { pullResourceInfo } from './methods';
@@ -86,11 +87,15 @@ export const stop = async (args = {}, ctx = {}) => {
   ctx.started = false;
 };
 
+export const subscribeTo = (args = {}, ctx = {}) => {
+  ctx.interestingResourcesIds = args.resourcesIds;
+};
+
 export const configure = async (conf = {}) => {
-  const { onSuccess, throttle = 10000 } = conf;
+  const { onChange, throttle = 1000 } = conf;
   const ctx = {};
 
-  ctx.onSuccess = onSuccess;
+  ctx.onChange = onChange;
   ctx.throttle = throttle;
 
   ctx.queue = [];
@@ -98,19 +103,43 @@ export const configure = async (conf = {}) => {
   ctx.rootResources = conf.rootResources || [{ id: 'root', path: '/' }];
   ctx.started = false;
   ctx.resources = [];
+  ctx.interestingResourcesIds = [];
 
   ctx.db = db;
+
+  ctx.changedResources = [];
+  ctx.db.resources.hook('updating', (__, resourceId) => {
+    ctx.changedResources.push(resourceId);
+  });
+
+  setInterval(() => {
+    if (ctx.changedResources.length > 0) {
+      const interesting = uniq(ctx.changedResources).filter(
+        resourceId => ctx.interestingResourcesIds.indexOf(resourceId) > -1,
+      );
+      if (interesting.length > 0) {
+        ctx.onChange(interesting);
+      }
+      ctx.changedResources = [];
+    }
+  }, ctx.throttle);
+
+  let prevDbCount = 0;
 
   setInterval(async () => {
     const dbCount = await db.resources.count();
     const queueSize = ctx.queue.length;
 
+    const speed = dbCount - prevDbCount;
+    prevDbCount = dbCount;
+
     // eslint-disable-next-line no-console
-    console.log('dbCount', dbCount, 'queueSize', queueSize);
+    console.log('dbCount', dbCount, 'queueSize', queueSize, 'speed', speed);
   }, 1000);
 
   return {
     start: () => start({}, ctx),
     stop: () => stop({}, ctx),
+    subscribeTo: resourcesIds => subscribeTo({ resourcesIds }, ctx),
   };
 };
