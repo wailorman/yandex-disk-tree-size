@@ -45,6 +45,7 @@ export const _splitToRelationsSteps = (resources) => {
 
 export const setAllParentResourcesIds = ctx => async (resourcePayload = {}) => {
   const { resources = [] } = resourcePayload;
+
   const relationsSteps = _splitToRelationsSteps(resources);
 
   await Promise.each(relationsSteps, async (resourcesIds = []) => {
@@ -72,24 +73,29 @@ export const setAllParentResourcesIds = ctx => async (resourcePayload = {}) => {
 export const setSizes = ctx => async (resourcePayload = {}) => {
   const { resources = [], parentResourceId } = resourcePayload;
 
+  if (!parentResourceId) return resourcePayload;
+
   const totalSize = resources.reduce((prev, cur) => {
     const curSize = +((cur && cur.size) || 0);
     return prev + curSize;
   }, 0);
 
-  const parentResource = await ctx.db.resources.get(parentResourceId);
-  const greatParentsIds = parentResource.allParentResourcesIds || [];
-  const greatParents = await Promise.all(
-    greatParentsIds.map(gParentId => ctx.db.resources.get(gParentId)),
-  );
-
-  Promise.all(
-    [parentResource, ...greatParents].map(async (resource) => {
-      await ctx.db.resources.update(resource.id, {
-        size: (resource.size || 0) + totalSize,
-      });
-    }),
-  );
+  // Sorry for this code, it's Dexie transactions...
+  ctx.db.transaction('rw', ctx.db.resources, () => {
+    ctx.db.resources.get(parentResourceId).then((parentResource) => {
+      const greatParentsIds = parentResource.allParentResourcesIds || [];
+      return Dexie.Promise.all(
+        greatParentsIds.map(gParentId => ctx.db.resources.get(gParentId)),
+      ).then(greatParents =>
+        Dexie.Promise.all(
+          [parentResource, ...greatParents].map(async (resource) => {
+            await ctx.db.resources.update(resource.id, {
+              size: (resource.size || 0) + totalSize,
+            });
+          }),
+        ));
+    });
+  });
 
   return resourcePayload;
 };
