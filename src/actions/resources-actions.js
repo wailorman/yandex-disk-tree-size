@@ -6,7 +6,7 @@ import { db } from '../api/db';
 
 let yandexDiskPuller;
 
-export const startFetchingResources = () => async (dispatch) => {
+export const startFetchingResources = () => async (dispatch, getState) => {
   dispatch({ type: AT.START_FETCHING_RESOURCES });
 
   yandexDiskPuller = await ResourcesPuller.configure({
@@ -47,6 +47,9 @@ export const startFetchingResources = () => async (dispatch) => {
   });
 
   yandexDiskPuller.start();
+
+  const presentedResourcesIds = Object.keys(ResourcesSelectors.objectsSelector(getState()));
+  yandexDiskPuller.subscribeTo(presentedResourcesIds);
 };
 
 export const changeCollapsedState = resourceId => async (dispatch, getState) => {
@@ -76,5 +79,5 @@ export const changeCollapsedState = resourceId => async (dispatch, getState) => 
   }
 
   const presentedResourcesIds = Object.keys(ResourcesSelectors.objectsSelector(getState()));
-  yandexDiskPuller.subscribeTo(presentedResourcesIds);
+  if (yandexDiskPuller) yandexDiskPuller.subscribeTo(presentedResourcesIds);
 };
