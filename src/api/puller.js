@@ -57,7 +57,7 @@ export const worker = async (args = {}, ctx = {}) => {
           ctx.queue.push({ id: resource.id, path: resource.path });
         });
       })
-      .delay(100)
+      .delay(500)
       .then(() => proceedTask())
       .catch((err) => {
         // eslint-disable-next-line no-console
